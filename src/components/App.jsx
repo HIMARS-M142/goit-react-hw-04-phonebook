@@ -13,31 +13,33 @@ const AppContainer = styled.div`
 `;
 
 export const App = () => {
-  const defaultContacts = [
+  const [contacts, setContacts] = useState(null);
+  const [filter, setFilter] = useState('');
+  const [defaultContacts, setDefaultContacts] = useState([
     { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
     { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
     { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
     { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-  ];
-  const [contacts, setContacts] = useState(null);
-  const [filter, setFilter] = useState('');
+  ]);
 
   useEffect(() => {
     const localData = localStorage.getItem('contacts');
-    localData && JSON.parse(localData).length
-      ? setContacts(JSON.parse(localData))
-      : setContacts(defaultContacts);
+    if (localData && JSON.parse(localData).length) {
+      setContacts(JSON.parse(localData));
+    } else {
+      setContacts(defaultContacts);
+    }
   }, []);
 
   useEffect(() => {
     contacts && localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
+
   const createList = ({ name, number }) => {
     const isRepeat = contacts.find(el => el.name === name);
     if (isRepeat) {
       return alert(`${name} is already in contacts`);
     }
-
     setContacts(prev => {
       return [
         {
@@ -49,23 +51,24 @@ export const App = () => {
       ];
     });
   };
+
   const onButtonDelete = key => {
     setContacts(prev => {
       return prev.filter(({ id }) => id !== key);
     });
   };
 
-  const filteredList = useMemo(() => {
+  const onInputValue = ({ target: { value } }) => {
+    setFilter(value);
+  };
+
+  const filterList = () => {
     return (
       contacts &&
       contacts.filter(({ name }) =>
         name.toLowerCase().includes(filter.toLowerCase())
       )
     );
-  }, [filter]);
-
-  const onInputValue = ({ target: { value } }) => {
-    setFilter(value);
   };
 
   return (
@@ -83,7 +86,7 @@ export const App = () => {
         <ContactForm createList={createList} />
         <h2>Contacts</h2>
         <Filter filter={onInputValue} filterValue={filter} />
-        <ContactList contacts={filteredList} onButtonDelete={onButtonDelete} />
+        <ContactList contacts={filterList()} onButtonDelete={onButtonDelete} />
       </AppContainer>
     </div>
   );
