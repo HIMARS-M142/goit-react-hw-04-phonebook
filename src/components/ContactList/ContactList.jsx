@@ -20,16 +20,17 @@ const ListStyled = styled.li`
 export const ContactList = ({ contacts, onButtonDelete }) => {
   return (
     <ContactsStyled>
-      {contacts.map(({ id, name, number }) => {
-        return (
-          <ListStyled key={id}>
-            {name}: {number}
-            <ButtonContact onClick={() => onButtonDelete(id)}>
-              Delete
-            </ButtonContact>
-          </ListStyled>
-        );
-      })}
+      {contacts &&
+        contacts.map(({ id, name, number }) => {
+          return (
+            <ListStyled key={id}>
+              {name}: {number}
+              <ButtonContact onClick={() => onButtonDelete(id)}>
+                Delete
+              </ButtonContact>
+            </ListStyled>
+          );
+        })}
     </ContactsStyled>
   );
 };

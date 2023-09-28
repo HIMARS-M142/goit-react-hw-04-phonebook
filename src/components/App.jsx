@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { ContactForm } from './ContactForm/ContactForm';
 import { ContactList } from './ContactList/ContactList';
@@ -19,15 +19,19 @@ export const App = () => {
     { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
     { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
   ];
-  const [contacts, setContacts] = useState(
-    JSON.parse(localStorage.getItem('contacts') ?? defaultContacts)
-  );
+  const [contacts, setContacts] = useState(null);
   const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    const localData = localStorage.getItem('contacts');
+    localData && JSON.parse(localData).length
+      ? setContacts(JSON.parse(localData))
+      : setContacts(defaultContacts);
+  }, []);
 
   useEffect(() => {
     contacts && localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
-
   const createList = ({ name, number }) => {
     const isRepeat = contacts.find(el => el.name === name);
     if (isRepeat) {
@@ -51,11 +55,15 @@ export const App = () => {
     });
   };
 
-  const filterList = () => {
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
+  const filteredList = useMemo(() => {
+    return (
+      contacts &&
+      contacts.filter(({ name }) =>
+        name.toLowerCase().includes(filter.toLowerCase())
+      )
     );
-  };
+  }, [filter]);
+
   const onInputValue = ({ target: { value } }) => {
     setFilter(value);
   };
@@ -75,7 +83,7 @@ export const App = () => {
         <ContactForm createList={createList} />
         <h2>Contacts</h2>
         <Filter filter={onInputValue} filterValue={filter} />
-        <ContactList contacts={filterList()} onButtonDelete={onButtonDelete} />
+        <ContactList contacts={filteredList} onButtonDelete={onButtonDelete} />
       </AppContainer>
     </div>
   );
